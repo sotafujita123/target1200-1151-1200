@@ -209,7 +209,7 @@ function toggleMenu() {
     document.getElementById('overlay').classList.toggle('active');
 }
 
-// 画面遷移
+// 画面遷移（別の画面に移動した際にテスト状態をリセット）
 function navigate(pageId) {
     toggleMenu();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -224,6 +224,7 @@ function navigate(pageId) {
     document.getElementById(pageId + '-page').classList.add('active');
 
     if (pageId === 'study') renderStudyCards();
+    if (pageId === 'test') resetTest(); // テスト画面を開く際は常に設定画面からスタート
     if (pageId === 'review') renderReviewCards();
 }
 
@@ -367,6 +368,7 @@ function showTestResult() {
 }
 
 function resetTest() {
+    document.getElementById('test-play').style.display = 'none';
     document.getElementById('test-result').style.display = 'none';
     document.getElementById('test-setup').style.display = 'block';
 }
