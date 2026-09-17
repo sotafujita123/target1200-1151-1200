@@ -50,6 +50,10 @@
         
         .start-btn, .next-btn { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .start-btn:hover { background: #219150; }
+
+        /* テストを中断するボタン */
+        .quit-btn { width: 100%; padding: 10px; background: transparent; color: #7f8c8d; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .quit-btn:hover { background: #fdf2e9; color: #e67e22; border-color: #e67e22; }
         
         /* テスト問題表示 */
         .question-text { font-size: 1.2rem; font-weight: bold; color: #2c3e50; margin-bottom: 10px; line-height: 1.4; }
@@ -125,6 +129,7 @@
             <div class="question-jp" id="question-translation"></div>
             <div class="options-grid" id="options-container"></div>
             <button class="next-btn" id="next-q-btn" style="display: none;" onclick="nextQuestion()">次の問題へ</button>
+            <button class="quit-btn" onclick="resetTest()">テストをやめる</button>
         </div>
 
         <!-- 結果画面 -->
@@ -209,7 +214,7 @@ function toggleMenu() {
     document.getElementById('overlay').classList.toggle('active');
 }
 
-// 画面遷移（別の画面に移動した際にテスト状態をリセット）
+// 画面遷移
 function navigate(pageId) {
     toggleMenu();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -223,8 +228,10 @@ function navigate(pageId) {
     document.getElementById('page-title').innerText = pageTitleMap[pageId];
     document.getElementById(pageId + '-page').classList.add('active');
 
+    // どの画面に移動しても進行中のテストは破棄
+    resetTest();
+
     if (pageId === 'study') renderStudyCards();
-    if (pageId === 'test') resetTest(); // テスト画面を開く際は常に設定画面からスタート
     if (pageId === 'review') renderReviewCards();
 }
 
@@ -247,7 +254,7 @@ function createCardElement(item) {
     return card;
 }
 
-// 1. 勉強用ページの描画（一列配置）
+// 1. 勉強用ページの描画
 function renderStudyCards() {
     const container = document.getElementById('study-card-list');
     container.innerHTML = '';
@@ -308,7 +315,7 @@ function renderQuestion() {
         jpElem.style.display = 'none';
     }
 
-    // 4択選択肢の作成（正解1点 + ダミー3点）
+    // 4択選択肢の作成
     const wrongCandidates = words.filter(w => w.no !== currentItem.no).sort(() => 0.5 - Math.random()).slice(0, 3);
     const options = [currentItem, ...wrongCandidates].sort(() => 0.5 - Math.random());
 
@@ -329,7 +336,7 @@ function renderQuestion() {
 
 function answerQuestion(selectedOpt, correctItem, clickedBtn) {
     const allBtns = document.querySelectorAll('.opt-btn');
-    allBtns.forEach(btn => btn.disabled = true); // 連打防止
+    allBtns.forEach(btn => btn.disabled = true);
 
     const isCorrect = (selectedOpt.no === correctItem.no);
 
@@ -337,18 +344,15 @@ function answerQuestion(selectedOpt, correctItem, clickedBtn) {
         clickedBtn.classList.add('correct');
         score++;
     } else {
-        // 間違いの場合：正解の単語の枠を赤く光らせる
         allBtns.forEach(btn => {
             if (btn.querySelector('.opt-text').innerText === correctItem.english) {
                 btn.classList.add('wrong-target');
             }
         });
-        wrongWords.add(correctItem.no); // 誤答リストに追加
+        wrongWords.add(correctItem.no);
     }
 
-    // すべての選択肢の下に日本語訳を表示させる
     document.querySelectorAll('.opt-sub-jp').forEach(el => el.style.display = 'block');
-
     document.getElementById('next-q-btn').style.display = 'block';
 }
 
@@ -367,7 +371,12 @@ function showTestResult() {
     document.getElementById('result-score').innerText = `${score} / ${testQueue.length}`;
 }
 
+// テストの中断＆初期設定画面へリセット
 function resetTest() {
+    testQueue = [];
+    currentTestIdx = 0;
+    score = 0;
+    
     document.getElementById('test-play').style.display = 'none';
     document.getElementById('test-result').style.display = 'none';
     document.getElementById('test-setup').style.display = 'block';
