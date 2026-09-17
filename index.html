@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英単語・熟語学習アプリ (No.1154〜1200)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; padding-top: 60px; padding-bottom: 30px; }
+        
+        /* ヘッダー＆ハンバーガーメニュー */
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 50px; background: #2c3e50; color: white; display: flex; align-items: center; padding: 0 15px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .menu-btn { font-size: 1.6rem; cursor: pointer; background: none; border: none; color: white; margin-right: 15px; }
+        .header-title { font-size: 1.1rem; font-weight: bold; }
+        
+        /* サイドナビゲーション */
+        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #34495e; color: white; transition: 0.3s; z-index: 200; padding-top: 60px; }
+        .sidebar.open { left: 0; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { padding: 15px 20px; border-bottom: 1px solid #455a64; cursor: pointer; font-weight: bold; }
+        .sidebar li:hover { background: #1abc9c; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 150; }
+        .overlay.active { display: block; }
+
+        /* コンテナ */
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 勉強用・間違えた問題（一列カード） */
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        .word-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); cursor: pointer; border-left: 5px solid #3498db; transition: transform 0.1s; }
+        .word-card:active { transform: scale(0.99); }
+        .word-card .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .word-card .no { font-size: 0.8rem; color: #7f8c8d; font-weight: bold; }
+        .word-card .english { font-size: 1.3rem; font-weight: bold; color: #2c3e50; }
+        .word-card .body { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #eee; }
+        .word-card.open .body { display: block; }
+        .word-card .japanese { font-size: 1.1rem; color: #e74c3c; font-weight: bold; margin-bottom: 8px; }
+        .word-card .example-en { font-size: 0.95rem; color: #333; margin-bottom: 4px; font-style: italic; }
+        .word-card .example-jp { font-size: 0.85rem; color: #666; }
+
+        /* テスト設定＆プレイ画面 */
+        .test-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .setting-group { margin-bottom: 20px; }
+        .setting-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #2c3e50; }
+        .setting-group select, .setting-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: normal !important; }
+        .checkbox-label input { width: auto; }
+        
+        .start-btn, .next-btn { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .start-btn:hover { background: #219150; }
+        
+        /* テスト問題表示 */
+        .question-text { font-size: 1.2rem; font-weight: bold; color: #2c3e50; margin-bottom: 10px; line-height: 1.4; }
+        .question-jp { font-size: 0.95rem; color: #7f8c8d; margin-bottom: 20px; background: #f8f9fa; padding: 8px 12px; border-radius: 5px; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        
+        /* 4択ボタン */
+        .opt-btn { background: #fff; border: 2px solid #bdc3c7; border-radius: 8px; padding: 12px 15px; text-align: left; cursor: pointer; transition: 0.2s; position: relative; }
+        .opt-btn .opt-text { font-size: 1.1rem; font-weight: bold; color: #2c3e50; }
+        .opt-btn .opt-sub-jp { font-size: 0.85rem; color: #e74c3c; margin-top: 4px; display: none; font-weight: bold; }
+        
+        /* 判定用クラス */
+        .opt-btn.correct { border-color: #27ae60 !important; background-color: #e8f8f5 !important; }
+        .opt-btn.wrong-target { border-color: #e74c3c !important; background-color: #fadbd8 !important; }
+        
+        .empty-msg { text-align: center; color: #7f8c8d; padding: 40px 0; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="header-title" id="page-title">勉強用 (No.1154〜1200)</div>
+</header>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<nav class="sidebar" id="sidebar">
+    <ul>
+        <li onclick="navigate('study')">📖 勉強用</li>
+        <li onclick="navigate('test')">📝 テスト</li>
+        <li onclick="navigate('review')">❌ 間違えた問題</li>
+    </ul>
+</nav>
+
+<div class="container">
+    <!-- 1. 勉強用ページ -->
+    <div id="study-page" class="page active">
+        <div style="font-size:0.85rem; color:#666; margin-bottom:10px;">※タップすると裏返り、日本語訳と例文が表示されます。</div>
+        <div class="card-list" id="study-card-list"></div>
+    </div>
+
+    <!-- 2. テストページ -->
+    <div id="test-page" class="page">
+        <!-- 設定画面 -->
+        <div class="test-box" id="test-setup">
+            <h2 style="margin-bottom: 15px; font-size: 1.2rem; color: #2c3e50;">テスト設定</h2>
+            <div class="setting-group">
+                <label>出題数</label>
+                <select id="question-count">
+                    <option value="10">10問</option>
+                    <option value="15">15問</option>
+                    <option value="20">20問</option>
+                    <option value="50">50問 (全問)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-translation-toggle" checked>
+                    英文の下に日本語訳を表示する
+                </label>
+            </div>
+            <button class="start-btn" onclick="startTest()">テスト開始</button>
+        </div>
+
+        <!-- プレイ画面 -->
+        <div class="test-box" id="test-play" style="display: none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.9rem; color:#7f8c8d;">
+                <span id="test-progress">第 1 / 10 問</span>
+                <span id="test-no-badge">No.1154</span>
+            </div>
+            <div class="question-text" id="question-sentence"></div>
+            <div class="question-jp" id="question-translation"></div>
+            <div class="options-grid" id="options-container"></div>
+            <button class="next-btn" id="next-q-btn" style="display: none;" onclick="nextQuestion()">次の問題へ</button>
+        </div>
+
+        <!-- 結果画面 -->
+        <div class="test-box" id="test-result" style="display: none; text-align: center;">
+            <h2 style="font-size: 1.4rem; color: #2c3e50; margin-bottom: 10px;">テスト結果</h2>
+            <div style="font-size: 2rem; font-weight: bold; color: #27ae60; margin: 15px 0;" id="result-score">8 / 10</div>
+            <p style="color: #666; margin-bottom: 20px;">間違えた問題は「間違えた問題」ページに保存されました。</p>
+            <button class="start-btn" onclick="resetTest()">もう一度テストする</button>
+        </div>
+    </div>
+
+    <!-- 3. 間違えた問題ページ -->
+    <div id="review-page" class="page">
+        <div style="font-size:0.85rem; color:#666; margin-bottom:10px;">※テストで間違えた問題がここに一覧表示されます。</div>
+        <div class="card-list" id="review-card-list"></div>
+    </div>
+</div>
+
+<script>
+// 単語データ全47件（No.1154〜1200）
+const words = [
+    { no: 1154, english: "at least", japanese: "少なくとも", example: "She reads at least four books a month.", ex_jp: "彼女は月に少なくとも4冊の本を読んでいる。", target: "at least" },
+    { no: 1155, english: "at (the) most", japanese: "せいぜい、多くても", example: "He'll be here in ten minutes at most.", ex_jp: "彼はせいぜい10分もすればここに来ますよ。", target: "at most" },
+    { no: 1156, english: "by way of ~", japanese: "～を通って、～の形で", example: "They went to Peru by way of Atlanta.", ex_jp: "彼らはアトランタ経由でペルーに行った。", target: "by way of" },
+    { no: 1157, english: "for some time", japanese: "かなり長い間、しばらくの間", example: "Since she's lived here for some time, she speaks Japanese well.", ex_jp: "彼女はかなり長い間ここに住んでいるだけに、日本語を話すのが上手だ。", target: "for some time" },
+    { no: 1158, english: "face to face (with ~)", japanese: "（～に）面と向かって", example: "I haven't talked to him face to face.", ex_jp: "私は彼と対面して話をしたことはない。", target: "face to face" },
+    { no: 1159, english: "first of all", japanese: "まず第一に、何よりもまず", example: "First of all, let me introduce myself.", ex_jp: "まず第一に、自己紹介をさせてください。", target: "First of all" },
+    { no: 1160, english: "in advance", japanese: "あらかじめ、～前に", example: "How many days in advance can I book?", ex_jp: "何日前に予約ができますか。", target: "in advance" },
+    { no: 1161, english: "in all", japanese: "全部で、合計で", example: "There were over 100 people in all at the test site.", ex_jp: "試験会場には合計100人以上いた。", target: "in all" },
+    { no: 1162, english: "in place of ~ / in ~'s place", japanese: "～の代わりに", example: "She uses soy milk in place of milk to make bread.", ex_jp: "彼女はパンを作るのに牛乳の代わりに豆乳を使う。", target: "in place of" },
+    { no: 1163, english: "in return (for ~)", japanese: "（～の）お返しに", example: "He asked nothing in return for his help.", ex_jp: "彼は手伝いのお返しを何も求めなかった。", target: "in return for" },
+    { no: 1164, english: "in the long run", japanese: "長い目で見れば、結局は", example: "It may be the best method in the long run.", ex_jp: "それは長い目で見れば最善の方法かもしれない。", target: "in the long run" },
+    { no: 1165, english: "in time (for ~)", japanese: "（～に）間に合うように", example: "We arrived just in time for the concert.", ex_jp: "私たちはコンサートにギリギリ間に合って到着した。", target: "in time for" },
+    { no: 1166, english: "on sale", japanese: "販売されて、特売で", example: "The tickets go on sale at 10 a.m. tomorrow.", ex_jp: "そのチケットは明日の午前10時に発売される。", target: "on sale" },
+    { no: 1167, english: "on time", japanese: "時間通りに、定刻に", example: "The ceremony started right on time.", ex_jp: "式典はきっかり時間通りに始まった。", target: "on time" },
+    { no: 1168, english: "one by one", japanese: "1つ［1人］ずつ", example: "He gave useful advice to the players one by one.", ex_jp: "彼は選手たちに1人ずつ有益な助言を与えた。", target: "one by one" },
+    { no: 1169, english: "out of the question", japanese: "論外で、不可能で", example: "Their proposal is completely out of the question.", ex_jp: "彼らの提案はまったく論外だ。", target: "out of the question" },
+    { no: 1170, english: "side by side (with ~)", japanese: "（～と）横に並んで", example: "We walked along the beach side by side.", ex_jp: "私たちはビーチを並んで歩いた。", target: "side by side" },
+    { no: 1171, english: "become", japanese: "～になる", example: "He became famous for posting the video.", ex_jp: "彼はそのビデオを投稿して有名になった。", target: "became" },
+    { no: 1172, english: "turn", japanese: "～になる、変わる", example: "The leaves have all turned red and yellow.", ex_jp: "葉はすっかり赤や黄色になった。", target: "turned" },
+    { no: 1173, english: "remain", japanese: "～のままである", example: "They have remained close friends after graduation.", ex_jp: "彼らは卒業後もずっと親友のままだ。", target: "remained" },
+    { no: 1174, english: "smell", japanese: "～のにおいがする", example: "These flowers smell sweet.", ex_jp: "これらの花は甘いにおいがする。", target: "smell" },
+    { no: 1175, english: "taste", japanese: "～の味がする", example: "This chicken tastes delicious.", ex_jp: "このチキンはとてもよい味だ。", target: "tastes" },
+    { no: 1176, english: "take", japanese: "～を連れて行く", example: "I took them to my most special place.", ex_jp: "私は彼らをとっておきの場所に連れて行った。", target: "took" },
+    { no: 1177, english: "put", japanese: "～を置く、入れる", example: "Should I put these copies on that desk?", ex_jp: "これらのコピーをあの机の上に置いておけばいいですか。", target: "put" },
+    { no: 1178, english: "set", japanese: "～を置く、配置する", example: "Help me set dishes on the table.", ex_jp: "テーブルに料理を並べるのを手伝ってよ。", target: "set" },
+    { no: 1179, english: "spread", japanese: "～を広げる", example: "He slowly spread his sleeping bag on the floor.", ex_jp: "彼はそっと寝袋を床に広げた。", target: "spread" },
+    { no: 1180, english: "fold", japanese: "～を折る、折りたたむ", example: "I folded the letter in half and gave it to her.", ex_jp: "私は手紙を二つ折りにし彼女に渡した。", target: "folded" },
+    { no: 1181, english: "show", japanese: "～を見せる、示す", example: "You need to show the guard your ID card.", ex_jp: "警備員に身分証を見せる必要がありますよ。", target: "show" },
+    { no: 1182, english: "give", japanese: "～を与える、あげる", example: "He gave me his used PC.", ex_jp: "彼は私に中古のパソコンをくれた。", target: "gave" },
+    { no: 1183, english: "choose", japanese: "～を選ぶ", example: "She chose her father a nice tie.", ex_jp: "彼女は父親にすてきなネクタイを選んであげた。", target: "chose" },
+    { no: 1184, english: "pay", japanese: "（金）を支払う", example: "I paid him 6,000 yen for the ticket.", ex_jp: "私は彼にチケット代として6千円払った。", target: "paid" },
+    { no: 1185, english: "leave", japanese: "～を残しておく", example: "Can I leave her a message?", ex_jp: "彼女に伝言を残しておいてもいいですか。", target: "leave" },
+    { no: 1186, english: "offer", japanese: "～を申し出る", example: "She was offered a job in the UK.", ex_jp: "彼女は英国での仕事のオファーをもらった。", target: "offered" },
+    { no: 1187, english: "bring", japanese: "～を持ってくる", example: "Bring me the newspaper, will you?", ex_jp: "新聞を持ってきてくれるかね？", target: "Bring" },
+    { no: 1188, english: "send", japanese: "～を送る", example: "The store sent me the wrong order.", ex_jp: "その店は私に間違った注文品を送ってきた。", target: "sent" },
+    { no: 1189, english: "pass", japanese: "～を手渡す", example: "Could you pass me the water?", ex_jp: "水を取ってもらえますか。", target: "pass" },
+    { no: 1190, english: "sell", japanese: "～を売る", example: "I sold him my bike for 3,000 yen.", ex_jp: "私は彼に自分の自転車を3千円で売った。", target: "sold" },
+    { no: 1191, english: "draw", japanese: "～を描く", example: "I'll draw you a map to the market.", ex_jp: "市場までの地図を描いてあげましょう。", target: "draw" },
+    { no: 1192, english: "owe", japanese: "～にお金を借りている", example: "He still owes her 1,000 yen for lunch.", ex_jp: "彼はまだ彼女にランチ代の千円を借りたままだ。", target: "owes" },
+    { no: 1193, english: "lend", japanese: "～を貸す", example: "Can you lend me this book until tomorrow?", ex_jp: "私にこの本を明日まで貸してもらえないかな。", target: "lend" },
+    { no: 1194, english: "envy", japanese: "～をうらやむ", example: "To be honest, I envy him his talent.", ex_jp: "正直言って、彼の才能がうらやましい。", target: "envy" },
+    { no: 1195, english: "make", japanese: "～を（ある状態に）する", example: "Classical music often makes me sleepy.", ex_jp: "クラシック音楽を聴くとよく私は眠くなる。", target: "makes" },
+    { no: 1196, english: "find", japanese: "～だとわかる、気づく", example: "He found the work very difficult.", ex_jp: "彼はその仕事がとても困難だと感じた。", target: "found" },
+    { no: 1197, english: "keep", japanese: "～を保つ", example: "Here're some tips for keeping vegetables fresh.", ex_jp: "野菜を新鮮に保つコツをご紹介しましょう。", target: "keeping" },
+    { no: 1198, english: "call", japanese: "～と呼ぶ", example: "My name is David but everyone calls me Dave.", ex_jp: "私の名前はデイビッドですが、みんなは私をデイブと呼んでいます。", target: "calls" },
+    { no: 1199, english: "know", japanese: "（を）知っている", example: "He knows a lot about Japanese culture.", ex_jp: "彼は日本文化についてよく知っている。", target: "knows" },
+    { no: 1200, english: "understand", japanese: "（を）理解する", example: "I don't understand what she's saying.", ex_jp: "私には彼女の言っていることがわかりません。", target: "understand" }
+];
+
+let wrongWords = new Set();
+let testQueue = [];
+let currentTestIdx = 0;
+let score = 0;
+
+// サイドバー開閉
+function toggleMenu() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('active');
+}
+
+// 画面遷移
+function navigate(pageId) {
+    toggleMenu();
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    const pageTitleMap = {
+        'study': '勉強用 (No.1154〜1200)',
+        'test': 'テスト',
+        'review': '間違えた問題'
+    };
+
+    document.getElementById('page-title').innerText = pageTitleMap[pageId];
+    document.getElementById(pageId + '-page').classList.add('active');
+
+    if (pageId === 'study') renderStudyCards();
+    if (pageId === 'review') renderReviewCards();
+}
+
+// 単語カード作成ヘルパー
+function createCardElement(item) {
+    const card = document.createElement('div');
+    card.className = 'word-card';
+    card.onclick = () => card.classList.toggle('open');
+    card.innerHTML = `
+        <div class="card-header">
+            <div class="english">${item.english}</div>
+            <div class="no">No.${item.no}</div>
+        </div>
+        <div class="body">
+            <div class="japanese">${item.japanese}</div>
+            <div class="example-en">${item.example}</div>
+            <div class="example-jp">${item.ex_jp}</div>
+        </div>
+    `;
+    return card;
+}
+
+// 1. 勉強用ページの描画（一列配置）
+function renderStudyCards() {
+    const container = document.getElementById('study-card-list');
+    container.innerHTML = '';
+    words.forEach(item => {
+        container.appendChild(createCardElement(item));
+    });
+}
+
+// 3. 間違えた問題ページの描画
+function renderReviewCards() {
+    const container = document.getElementById('review-card-list');
+    container.innerHTML = '';
+    if (wrongWords.size === 0) {
+        container.innerHTML = '<div class="empty-msg">間違えた問題はまだありません！</div>';
+        return;
+    }
+    words.filter(w => wrongWords.has(w.no)).forEach(item => {
+        container.appendChild(createCardElement(item));
+    });
+}
+
+// 2. テスト処理
+function startTest() {
+    const countReq = parseInt(document.getElementById('question-count').value, 10);
+    const count = Math.min(countReq, words.length);
+
+    // ランダム抽出
+    testQueue = [...words].sort(() => 0.5 - Math.random()).slice(0, count);
+    currentTestIdx = 0;
+    score = 0;
+
+    document.getElementById('test-setup').style.display = 'none';
+    document.getElementById('test-result').style.display = 'none';
+    document.getElementById('test-play').style.display = 'block';
+
+    renderQuestion();
+}
+
+function renderQuestion() {
+    document.getElementById('next-q-btn').style.display = 'none';
+    const currentItem = testQueue[currentTestIdx];
+    const total = testQueue.length;
+
+    document.getElementById('test-progress').innerText = `第 ${currentTestIdx + 1} / ${total} 問`;
+    document.getElementById('test-no-badge').innerText = `No.${currentItem.no}`;
+
+    // 該当単語部を空欄（ ______ ）に置換
+    const maskedSentence = currentItem.example.replace(new RegExp(currentItem.target, 'i'), '( _______ )');
+    document.getElementById('question-sentence').innerText = maskedSentence;
+
+    // 訳の表示切り替え設定
+    const showJp = document.getElementById('show-translation-toggle').checked;
+    const jpElem = document.getElementById('question-translation');
+    if (showJp) {
+        jpElem.innerText = currentItem.ex_jp;
+        jpElem.style.display = 'block';
+    } else {
+        jpElem.style.display = 'none';
+    }
+
+    // 4択選択肢の作成（正解1点 + ダミー3点）
+    const wrongCandidates = words.filter(w => w.no !== currentItem.no).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const options = [currentItem, ...wrongCandidates].sort(() => 0.5 - Math.random());
+
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `
+            <div class="opt-text">${opt.english}</div>
+            <div class="opt-sub-jp">【訳】${opt.japanese}</div>
+        `;
+        btn.onclick = () => answerQuestion(opt, currentItem, btn);
+        container.appendChild(btn);
+    });
+}
+
+function answerQuestion(selectedOpt, correctItem, clickedBtn) {
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(btn => btn.disabled = true); // 連打防止
+
+    const isCorrect = (selectedOpt.no === correctItem.no);
+
+    if (isCorrect) {
+        clickedBtn.classList.add('correct');
+        score++;
+    } else {
+        // 間違いの場合：正解の単語の枠を赤く光らせる
+        allBtns.forEach(btn => {
+            if (btn.querySelector('.opt-text').innerText === correctItem.english) {
+                btn.classList.add('wrong-target');
+            }
+        });
+        wrongWords.add(correctItem.no); // 誤答リストに追加
+    }
+
+    // すべての選択肢の下に日本語訳を表示させる
+    document.querySelectorAll('.opt-sub-jp').forEach(el => el.style.display = 'block');
+
+    document.getElementById('next-q-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+    currentTestIdx++;
+    if (currentTestIdx < testQueue.length) {
+        renderQuestion();
+    } else {
+        showTestResult();
+    }
+}
+
+function showTestResult() {
+    document.getElementById('test-play').style.display = 'none';
+    document.getElementById('test-result').style.display = 'block';
+    document.getElementById('result-score').innerText = `${score} / ${testQueue.length}`;
+}
+
+function resetTest() {
+    document.getElementById('test-result').style.display = 'none';
+    document.getElementById('test-setup').style.display = 'block';
+}
+
+// 初頭化
+renderStudyCards();
+</script>
+</body>
+</html>
