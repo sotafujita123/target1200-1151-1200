@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英単語・熟語学習アプリ (No.1154〜1200)</title>
+    <title>英単語・熟語学習アプリ (No.1151〜1200)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
         body { background-color: #f4f7f6; color: #333; padding-top: 60px; padding-bottom: 30px; }
@@ -72,7 +72,7 @@
 
 <header>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <div class="header-title" id="page-title">勉強用 (No.1154〜1200)</div>
+    <div class="header-title" id="page-title">勉強用 (No.1151〜1200)</div>
 </header>
 
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -119,7 +119,7 @@
         <div class="test-box" id="test-play" style="display: none;">
             <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.9rem; color:#7f8c8d;">
                 <span id="test-progress">第 1 / 10 問</span>
-                <span id="test-no-badge">No.1154</span>
+                <span id="test-no-badge">No.1151</span>
             </div>
             <div class="question-text" id="question-sentence"></div>
             <div class="question-jp" id="question-translation"></div>
@@ -144,8 +144,11 @@
 </div>
 
 <script>
-// 単語データ全47件（No.1154〜1200）
+// 単語データ全50件（No.1151〜1200）
 const words = [
+    { no: 1151, english: "all at once", japanese: "（予期せずに）突然、いっせいに", example: "All at once it began to rain heavily.", ex_jp: "突然雨が激しく降り出した。", target: "All at once" },
+    { no: 1152, english: "all the way", japanese: "はるばる、ずっと", example: "Thank you for coming all the way.", ex_jp: "はるばるお越しくださりありがとうございます。", target: "all the way" },
+    { no: 1153, english: "along with ~", japanese: "～と一緒に、～に加えて", example: "I sent flowers along with a message card.", ex_jp: "私はメッセージカードを添えて花を送った。", target: "along with" },
     { no: 1154, english: "at least", japanese: "少なくとも", example: "She reads at least four books a month.", ex_jp: "彼女は月に少なくとも4冊の本を読んでいる。", target: "at least" },
     { no: 1155, english: "at (the) most", japanese: "せいぜい、多くても", example: "He'll be here in ten minutes at most.", ex_jp: "彼はせいぜい10分もすればここに来ますよ。", target: "at most" },
     { no: 1156, english: "by way of ~", japanese: "～を通って、～の形で", example: "They went to Peru by way of Atlanta.", ex_jp: "彼らはアトランタ経由でペルーに行った。", target: "by way of" },
@@ -212,7 +215,7 @@ function navigate(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
     const pageTitleMap = {
-        'study': '勉強用 (No.1154〜1200)',
+        'study': '勉強用 (No.1151〜1200)',
         'test': 'テスト',
         'review': '間違えた問題'
     };
@@ -368,7 +371,7 @@ function resetTest() {
     document.getElementById('test-setup').style.display = 'block';
 }
 
-// 初頭化
+// 初期化
 renderStudyCards();
 </script>
 </body>
